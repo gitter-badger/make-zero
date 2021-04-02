@@ -2,6 +2,9 @@ import cryptorConfig from "../cryptor-config"
 import Cryptor1 from './cryptor1'
 import Cryptor2 from './cryptor2'
 import Cryptor3 from "./cryptor3"
+import Cryptor97 from "./cryptor97"
+import Cryptor98 from "./cryptor98"
+import Cryptor99 from "./cryptor99"
 
 /**
  * The set of cryptors with different version
@@ -18,6 +21,14 @@ class CryptorComposite {
     this.register(new Cryptor1())
     this.register(new Cryptor2())
     this.latest = this.register(new Cryptor3())
+
+    const lang = chrome.i18n.getUILanguage()
+    if (!lang || lang.startsWith('zh')) {
+      // Only open to chinese 
+      this.register(new Cryptor97())
+      this.register(new Cryptor98())
+      this.register(new Cryptor99())
+    }
   }
 
   private register(cryptor: ICryptor): ICryptor {
@@ -26,15 +37,15 @@ class CryptorComposite {
     return cryptor
   }
 
-  version(): number {
-    return this.latest.version()
+  versions(): number[] {
+    return this.cryptors.map(c => c.version())
   }
 
   encrypt(plain: string, callback: (ciphertext: string) => void): void {
     cryptorConfig.getCipherVersion(version => {
       const cryptor: ICryptor = version && this.cryptorMap.get(version) || this.latest
       cryptorConfig.getPassword((password: string) => {
-        callback(cryptor.encript(plain, password))
+        cryptor.encrypt(plain, password, callback)
       })
     })
   }
@@ -46,8 +57,7 @@ class CryptorComposite {
       callback(cipher)
     } else {
       cryptorConfig.getPassword((psw: string) => {
-        const plaintext = cryptor.decrypt(cipher, psw)
-        callback(plaintext)
+        cryptor.decrypt(cipher, psw, callback)
       })
     }
   }
@@ -106,9 +116,9 @@ export interface ICryptor {
    */
   version(): number
 
-  encript(plain: string, password: string): string
+  encrypt(plain: string, password: string, callback: (cipher: string) => void): void
 
-  decrypt(cipher: string, password: string): string
+  decrypt(cipher: string, password: string, callback: (plain: string) => void): void
 }
 
 export default new CryptorComposite()

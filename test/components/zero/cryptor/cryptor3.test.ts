@@ -11,11 +11,12 @@ function randomStr() {
   return str
 }
 
-test('test-cryptor3', () => {
-  for (let i = 5; i; i--) {
-    const str = randomStr()
-    const cipher = cryptor.encript(str, DEFAULT_PASSWORD)
-    const plain = cryptor.decrypt(cipher, DEFAULT_PASSWORD)
-    expect(str).toEqual(plain)
-  }
+test('test-cryptor3', done => {
+  const str = randomStr()
+  cryptor.encrypt(str, DEFAULT_PASSWORD, cipher => {
+    cryptor.decrypt(cipher, DEFAULT_PASSWORD, plain => {
+      expect(str).toEqual(plain)
+      done()
+    })
+  })
 })

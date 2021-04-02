@@ -22,12 +22,12 @@ export default class Cryptor1 implements ICryptor {
     return 1
   }
 
-  encript(plain: string, password: string): string {
-    return this.ring(plain, password)
+  encrypt(plain: string, password: string, callback: (cipher: string) => void): void {
+    callback(this.ring(plain, password))
   }
 
-  decrypt(cipher: string, password: string): string {
-    return this.ring(cipher, password)
+  decrypt(cipher: string, password: string, callback: (plain: string) => void): void {
+    callback(this.ring(cipher, password))
   }
 
   private ring(msg: string, psw: string): string {

@@ -9,7 +9,7 @@ const ZERO = '·'
 
 /**
  * 
- * The second version of cryptor with morse code
+ * The third version of cryptor with morse code
  * 
  * Format:
  * 4-digits-max-word-length + cipher
@@ -34,25 +34,26 @@ export default class Cryptor3 implements ICryptor {
     return 3
   }
 
-  encript(plain: string, password: string): string {
+  encrypt(plain: string, password: string, callback: (cipher: string) => void): void {
     let pn = password2Number(password)
 
     const cipherUnicodes: number[] = ringToUnicodes(pn, plain)
 
     const unicodeLength: number = this.maxUnicodeLength(cipherUnicodes)
 
-    return PREFIX + this.number2MorseCode(unicodeLength, WORD_LEN_LEN) + cipherUnicodes.map(unicode => this.number2MorseCode(unicode, unicodeLength)).join("")
+    const cipher = PREFIX + this.number2MorseCode(unicodeLength, WORD_LEN_LEN) + cipherUnicodes.map(unicode => this.number2MorseCode(unicode, unicodeLength)).join("")
+    callback(cipher)
   }
 
-  decrypt(cipher: string, password: string): string {
+  decrypt(cipher: string, password: string, callback: (plain: string) => void): void {
     if (cipher.length < WORD_LEN_LEN + 1) {
-      return cipher
+      return callback(cipher)
     }
     cipher = cipher.substr(1)
     const lenthMorse = cipher.substring(0, 4)
     let length = this.morse2Number(lenthMorse)
     if (length < 0) {
-      return cipher
+      return callback(cipher)
     }
     if (length === 0) {
       length = 16
@@ -61,12 +62,12 @@ export default class Cryptor3 implements ICryptor {
     for (let i = WORD_LEN_LEN; i + length <= cipher.length; i += length) {
       const unicode = this.morse2Number(cipher.substr(i, length))
       if (unicode === -1) {
-        return cipher
+        return callback(cipher)
       }
       unicodes.push(unicode)
     }
     const pn = password2Number(password)
-    return ringFromUnicodes(pn, unicodes)
+    callback(ringFromUnicodes(pn, unicodes))
   }
 
   /**

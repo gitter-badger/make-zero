@@ -46,7 +46,7 @@
       </el-form-item>
       <el-form-item :label="$t('setting.cipherType.label')">
         <el-select v-model="cipherVersion">
-          <el-option v-for="i in maxVersion"
+          <el-option v-for="i in allVersions"
                      :value="i"
                      :key="i"
                      :label="i+'. '+$t(`setting.cipherType.remark.${i}`)" />
@@ -66,7 +66,7 @@ export default {
       password: '',
       autoEncrypt: false,
       autoDecrypt: false,
-      maxVersion: cryptor.version(),
+      allVersions: cryptor.versions(),
       cipherVersion: 1
     }
   },

@@ -24,24 +24,24 @@ export default class Cryptor2 extends Cryptor1 implements ICryptor {
     return 'z02'
   }
 
-  encript(plain: string, password: string): string {
+  encrypt(plain: string, password: string, callback: (cipher: string) => void): void {
     let pn: number = password2Number(password)
     const salt: Salt = new Salt()
     salt.calcSalt(pn)
     pn = salt.getNewPn()
 
     const cipher = ring(pn, plain)
-    return this.prefix() + String.fromCharCode(salt.getPrefixUnicode()) + cipher
+    callback(this.prefix() + String.fromCharCode(salt.getPrefixUnicode()) + cipher)
   }
 
-  decrypt(cipher: string, password: string): string {
+  decrypt(cipher: string, password: string, callback: (plain: string) => void): void {
     let pn: number = password2Number(password)
 
     const salt: Salt = new Salt()
     salt.parseSalt(pn, cipher.charCodeAt(0))
     pn = salt.getNewPn()
 
-    return ring(pn, cipher.substring(1))
+    callback(ring(pn, cipher.substring(1)))
   }
 }
 
